@@ -12,7 +12,9 @@ import bcrypt from "bcrypt";
 // //////////////////// CONNECTION TO DISPLAY ///////////////////////////// //
 // //////////////////////////////////////////////////////////////////////// //
 
-const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/project-final";
+// 127.0.0.1:27017 - Annika us this instead of localhost in the URL
+
+const mongoUrl = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/project-final";
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = Promise;
 
@@ -297,9 +299,8 @@ app.patch("/todos/:id", async (req, res) => {
 app.delete("/todos/:id", authenticateUser);
 app.delete("/todos/:id", async (req, res) => {
   const { id } = req.params;
-  const { description, category, completed, priority } = req.body;
   try {
-    const deletedTodo = await Todo.findByIdAndDelete(id, { description, category, completed, priority });
+    const deletedTodo = await Todo.findByIdAndDelete(id);
 
     if (deletedTodo) {
       res.status(200).json({
