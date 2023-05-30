@@ -88,7 +88,7 @@ const UserSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    /* default: 'default-avatar.jpg' // You can set a default avatar image if desired */
+    default: 'default-avatar.jpg' // You can set a default avatar image if desired */
   }
 });
 
@@ -129,19 +129,22 @@ const authenticateUser = async (req, res, next) => {
 // PATCH todo
 // DELETE todo
 
-// ////////// API DOCUMENTATION ///////// //
+// ================= API DOCUMENTATION =============== //
 
 app.get("/", (req, res) => {
   res.send({
     "Hello frontend developer": "Here's a documentation of the endpoints",
     "Endpoints": [
     {"/": "Api Info"},
-    {"/thoughts": "GET. See 20 thoughts in descending order"}
+    {"/register": "POST. Post Mail, Username, Password"},
+    {"/login": "POST. Post Mail, Password"},
+    {"/todos": "GET. See to-dos in descending order"},
+    {"/todos": "POST. Post new to-dos"},
     ]
   });
 });
 
-// //////////// REGISTER //////////////// //
+// ================= REGISTER =============== //
 
 app.post("/register", async (req, res) => {
   const {username, mail, password } = req.body
@@ -157,6 +160,7 @@ app.post("/register", async (req, res) => {
     response: {
       username: newUser.username,
       id: newUser._id,
+      mail: newUser.mail,
       accessToken: newUser.accessToken 
     }
   })
@@ -175,12 +179,47 @@ app.post("/register", async (req, res) => {
   }
 })
 
-// //////////// GET TO-DO´s ///////// //
+// ================= LOGIN =============== //
+
+app.post("/login", async (req, res) => {
+  const { mail, password } = req.body; // Extract the mail and password from the request body
+
+  try {
+    const user = await User.findOne({ mail: mail }); // Find a user with the provided mail in the database
+
+    if (user && bcrypt.compareSync(password, user.password)) {
+      // Check if the user exists and the provided password matches the hashed password in the database
+      res.status(200).json({
+        success: true,
+        response: {
+          username: user.username,
+          id: user._id,
+          mail: user.mail,
+          accessToken: user.accessToken
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        response: "Credentials do not match or the account does not exist"
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      response: error
+    });
+  }
+});
+
+// ================= GET TO-DOs =============== //
 
 app.get("/todos", authenticateUser)
 app.get("/todos", async (req, res) => {
+    const accessToken = req.header("Authorization"); // Extract the access token from the request header
+    const user = await User.findOne({ accessToken: accessToken }); // Find the user associated with the access token
   try {
-    const displayedTodos = await Todo.find().sort({createdAt: 'desc'}) // Exec()?
+    const displayedTodos = await Todo.find({ user: user._id }).sort({createdAt: 'desc'}) // Exec()?
     res.status(200).json({
       success: true, 
       response: displayedTodos,
@@ -193,6 +232,94 @@ app.get("/todos", async (req, res) => {
     message: "Did not find To-do list"
    });
 }
+});
+
+// ================= POST TO-DOs =============== //
+
+app.post("/todos", authenticateUser);
+app.post("/todos", async (req, res) => {
+  const { description, category } = req.body; // Extract the message from the request body
+  const accessToken = req.header("Authorization"); // Extract the access token from the request header
+  const user = await User.findOne({ accessToken: accessToken }); // Find the user associated with the access token
+  try {
+    const todo = await new Todo({
+      description: description,
+      category: category,
+      user: user._id // Set the user field to the user's _id
+    }).save();
+
+    res.status(200).json({ 
+      success: true, 
+      response: todo 
+    });
+  } catch(error) {
+    res.status(400).json({
+      success: false,
+      response: error,
+      message: "Failed to create a new todo"
+    });
+  }
+});
+
+// ================= PATCH TO-DOs =============== //
+
+app.patch("/todos/:id", authenticateUser);
+app.patch("/todos/:id", async (req, res) => {
+  const { id } = req.params; // Extract the todo id from the request parameters
+  const { description, category, completed, priority } = req.body; // Extract the updated fields from the request body
+  try {
+    const updatedTodo = await Todo.findByIdAndUpdate(id, { description, category, completed, priority }, { new: true }
+    );
+
+    if (updatedTodo) {
+      res.status(200).json({
+        success: true,
+        response: updatedTodo,
+        message: "Todo updated successfully"
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        response: "Todo not found"
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      response: error,
+      message: "Failed to update the todo"
+    });
+  }
+});
+
+// ================= DELETED TO-DOs =============== //
+
+app.delete("/todos/:id", authenticateUser);
+app.delete("/todos/:id", async (req, res) => {
+  const { id } = req.params;
+  const { description, category, completed, priority } = req.body;
+  try {
+    const deletedTodo = await Todo.findByIdAndDelete(id, { description, category, completed, priority });
+
+    if (deletedTodo) {
+      res.status(200).json({
+        success: true,
+        response: deletedTodo,
+        message: "Todo deleted successfully"
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        response: "Todo not found"
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      response: error,
+      message: "Failed to delete the todo"
+    });
+  }
 });
 
 // /////////////////////////////////////////////////////////////////////// //
