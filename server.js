@@ -141,7 +141,9 @@ app.get("/", (req, res) => {
     {"/register": "POST. Post Mail, Username, Password"},
     {"/login": "POST. Post Mail, Password"},
     {"/todos": "GET. See to-dos in descending order"},
-    {"/todos": "POST. Post new to-dos"},
+    {"/todos": "POST. Post one new to-do"},
+    {"/todos/:id": "PATCH. Edit one to-do"},
+    {"/todos/:id": "DELETE. Delete one to-do"}
     ]
   });
 });
