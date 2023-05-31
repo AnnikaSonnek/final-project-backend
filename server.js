@@ -157,7 +157,7 @@ app.post("/register", async (req, res) => {
     const salt = bcrypt.genSaltSync() //create random salt
     const newUser = await new User({
       username: username,
-      mail: mail,
+      mail: mail, // will not be used in frontend store
       password: bcrypt.hashSync(password, salt) // hashes the password and the random salt
     }).save()
   res.status(201).json({
@@ -199,7 +199,7 @@ app.post("/login", async (req, res) => {
         response: {
           username: user.username,
           id: user._id,
-          mail: user.mail,
+          mail: user.mail, //will not be used in the frontend
           accessToken: user.accessToken
         }
       });
