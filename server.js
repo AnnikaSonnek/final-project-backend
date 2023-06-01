@@ -243,19 +243,21 @@ app.get("/todos", async (req, res) => {
 
 app.post("/todos", authenticateUser);
 app.post("/todos", async (req, res) => {
-  const { description, category } = req.body; // Extract the message from the request body
+  const { description, category, deadline, priority } = req.body; // Extract the message from the request body
   const accessToken = req.header("Authorization"); // Extract the access token from the request header
   const user = await User.findOne({ accessToken: accessToken }); // Find the user associated with the access token
   try {
-    const todo = await new Todo({
+    const newTodo = await new Todo({
       description: description,
+      deadline: deadline,
       category: category,
+      priority: priority,
       user: user._id // Set the user field to the user's _id
     }).save();
 
     res.status(200).json({ 
       success: true, 
-      response: todo 
+      response: newTodo 
     });
   } catch(error) {
     res.status(400).json({
