@@ -147,6 +147,7 @@ app.get("/", (req, res) => {
     {"/login": "POST. Post Mail, Password"},
     {"/todos": "GET. See to-dos in descending order"},
     {"/todos": "POST. Post one new to-do"},
+    {"/todos/:id": "GET. GET one to-do"},
     {"/todos/:id": "PATCH. Edit one to-do"},
     {"/todos/:id": "DELETE. Delete one to-do"}
     ]
@@ -272,7 +273,35 @@ app.post("/todos", async (req, res) => {
   }
 });
 
-// ================= PATCH TO-DOs =============== //
+// ================= GET TO-DO =============== //
+app.get("/todos/:id", authenticateUser);
+app.get("/todos/:id", async (req, res) => {
+  const { id } = req.params; // Extract the todo id from the request parameters
+  try {
+    const singleTodo = await Todo.findById(id, );
+
+    if (singleTodo) {
+      res.status(200).json({
+        success: true,
+        response: singleTodo,
+        message: "Single todo found!"
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        response: "Single todo not found"
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      response: error,
+      message: "Failed to find the single todo"
+    });
+  }
+});
+
+// ================= PATCH TO-DO =============== //
 
 app.patch("/todos/:id", authenticateUser);
 app.patch("/todos/:id", async (req, res) => {
@@ -303,7 +332,7 @@ app.patch("/todos/:id", async (req, res) => {
   }
 });
 
-// ================= DELETED TO-DOs =============== //
+// ================= DELETED TO-DO =============== //
 
 app.delete("/todos/:id", authenticateUser);
 app.delete("/todos/:id", async (req, res) => {
