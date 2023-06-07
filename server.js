@@ -171,7 +171,8 @@ app.post("/register", async (req, res) => {
       username: newUser.username,
       id: newUser._id,
       mail: newUser.mail,
-      accessToken: newUser.accessToken 
+      accessToken: newUser.accessToken, 
+      avatar: newUser.avatar
     }
   })
   } catch (error) {
@@ -205,7 +206,8 @@ app.post("/login", async (req, res) => {
           username: user.username,
           id: user._id,
           mail: user.mail, //will not be used in the frontend
-          accessToken: user.accessToken
+          accessToken: user.accessToken,
+          avatar: user.avatar
         }
       });
     } else {
