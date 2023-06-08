@@ -90,8 +90,8 @@ const UserSchema = new mongoose.Schema({
     default: () => crypto.randomBytes(128).toString("hex")
   },
   avatar: {
-    type: String,
-    default: 'default-avatar.jpg' // You can set a default avatar image if desired */
+    type: Number,
+    default: 1 // You can set a default avatar image if desired */
   }, 
   checkedTasks: {
     type: Number,
