@@ -90,8 +90,8 @@ const UserSchema = new mongoose.Schema({
     default: () => crypto.randomBytes(128).toString("hex")
   },
   avatar: {
-    type: Number,
-    default: 1 // You can set a default avatar image if desired */
+    type: String,
+    default: 'default-avatar.jpeg' // You can set a default avatar image if desired */
   }, 
   checkedTasks: {
     type: Number,
@@ -149,7 +149,8 @@ app.get("/", (req, res) => {
     {"/todos": "POST. Post one new to-do"},
     {"/todos/:id": "GET. GET one to-do"},
     {"/todos/:id": "PATCH. Edit one to-do"},
-    {"/todos/:id": "DELETE. Delete one to-do"}
+    {"/todos/:id": "DELETE. Delete one to-do"},
+    {"/todos/:id/completed": "PATCH. Update completed status of one todo"}
     ]
   });
 });
@@ -220,37 +221,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({
       success: false,
       response: error
-    });
-  }
-});
-
-// ================= PATCH AVATAR =============== //
-
-app.patch("/users/:id/avatar", authenticateUser);
-app.patch("/users/:id/avatar", async (req, res) => {
-  const { id } = req.params; // Extract the todo id from the request parameters
-  const { avatar } = req.body; // Extract the updated fields from the request body
-  try {
-    const updatedUser = await User.findByIdAndUpdate(id, { avatar }, { new: true }
-    );
-
-    if (updatedUser) {
-      res.status(200).json({
-        success: true,
-        response: updatedUser,
-        message: "Avatar updated successfully"
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        response: "User not found"
-      });
-    }
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      response: error,
-      message: "Failed to update the avatar"
     });
   }
 });
