@@ -308,9 +308,9 @@ app.get("/todos/:id", async (req, res) => {
 app.patch("/todos/:id", authenticateUser);
 app.patch("/todos/:id", async (req, res) => {
   const { id } = req.params; // Extract the todo id from the request parameters
-  const { description, category, completed, priority } = req.body; // Extract the updated fields from the request body
+  const { description, category, deadline, priority } = req.body; // Extract the updated fields from the request body
   try {
-    const updatedTodo = await Todo.findByIdAndUpdate(id, { description, category, completed, priority }, { new: true }
+    const updatedTodo = await Todo.findByIdAndUpdate(id, { description, category, deadline, priority }, { new: true }
     );
 
     if (updatedTodo) {
