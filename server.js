@@ -228,14 +228,14 @@ app.post("/login", async (req, res) => {
 
 
 // ================= COMPLETED TASKS USER =============== //
-app.patch("/users/:userid/checkedtasks", authenticateUser)
+app.patch("/users/:id/checkedtasks", authenticateUser)
 app.patch("/users/:userid/checkedtasks", async (req, res) => {
-  const userId = req.params;
+  const { id } = req.params;
   const increment = parseInt(req.body.increment);
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      id,
       { $inc: { checkedTasks: increment } },
       { new: true }
     );
