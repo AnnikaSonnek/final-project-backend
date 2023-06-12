@@ -208,6 +208,7 @@ app.post("/login", async (req, res) => {
           id: user._id,
           mail: user.mail, //will not be used in the frontend
           accessToken: user.accessToken,
+          checkedTasks: user.checkedTasks,
           avatar: user.avatar
         }
       });
