@@ -229,7 +229,7 @@ app.post("/login", async (req, res) => {
 
 // ================= COMPLETED TASKS USER =============== //
 app.patch("/users/:id/checkedtasks", authenticateUser)
-app.patch("/users/:userid/checkedtasks", async (req, res) => {
+app.patch("/users/:id/checkedtasks", async (req, res) => {
   const { id } = req.params;
   const increment = parseInt(req.body.increment);
 
