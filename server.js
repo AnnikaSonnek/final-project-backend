@@ -228,9 +228,9 @@ app.post("/login", async (req, res) => {
 
 
 // ================= COMPLETED TASKS USER =============== //
-app.post("/users/:userid/checkedtasks", authenticateUser)
-app.post("/users/:userid/checkedtasks", async (req, res) => {
-  const userId = req.params.userid;
+app.patch("/users/:userid/checkedtasks", authenticateUser)
+app.patch("/users/:userid/checkedtasks", async (req, res) => {
+  const userId = req.params;
   const increment = parseInt(req.body.increment);
 
   try {
