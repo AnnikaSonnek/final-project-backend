@@ -91,7 +91,7 @@ const UserSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: 'default-avatar.jpeg' // You can set a default avatar image if desired */
+    default: '1' // You can set a default avatar image if desired */
   }, 
   checkedTasks: {
     type: Number,
