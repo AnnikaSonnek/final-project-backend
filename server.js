@@ -295,37 +295,6 @@ app.patch("/users/:id/avatar", async (req, res) => {
 });
 
 
-
-/*app.patch("/todos/:id", authenticateUser);
-app.patch("/todos/:id", async (req, res) => {
-  const { id } = req.params; // Extract the todo id from the request parameters
-  const { description, category, deadline, priority } = req.body; // Extract the updated fields from the request body
-  try {
-    const updatedTodo = await Todo.findByIdAndUpdate(id, { description, category, deadline, priority }, { new: true }
-    );
-
-    if (updatedTodo) {
-      res.status(200).json({
-        success: true,
-        response: updatedTodo,
-        message: "Todo updated successfully"
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        response: "Todo not found"
-      });
-    }
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      response: error,
-      message: "Failed to update the todo"
-    });
-  }
-});
-*/
-
 // ================= GET TO-DOs =============== //
 
 app.get("/todos", authenticateUser)
