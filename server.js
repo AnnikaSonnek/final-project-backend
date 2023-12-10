@@ -5,8 +5,8 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-/* import crypto from "crypto";
-import bcrypt from "bcrypt"; */
+import crypto from "crypto";
+import bcrypt from "bcrypt";
 // import dotenv from 'dotenv';
 
 // //////////////////////////////////////////////////////////////////////// //
@@ -15,7 +15,7 @@ import bcrypt from "bcrypt"; */
 
 // 127.0.0.1:27017 - Annika us this instead of localhost in the URL
 
-const mongoUrl = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/truecrime";
+const mongoUrl = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/project-final";
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = Promise;
 
@@ -30,299 +30,100 @@ app.use(express.json());
 // //////////////////////////// SCHEMAS /////////////////////////////////// //
 // //////////////////////////////////////////////////////////////////////// //
 
-// /////////// MOVIE SCHEMA /////////// //
+// /////////// TODO SCHEMA /////////// //
 
-const MovieSchema = new mongoose.Schema({
-  title: {
-    type: String, 
+const TodoSchema = new mongoose.Schema({
+  description: {
+    type: String,
     required: true,
+    minlength: 5,
+    maxlenght: 140,
+    trim: true
   },
-  swedishTitle: {
-    type: String, 
+  deadline: {
+    type: Date
   },
-  released: {
+  createdAt: {
     type: Date,
+    default: Date.now
   },
-  synopsis: {
+  category: {
     type: String,
-    required: true,
+    required: true
   },
-  director: {
-    type: String,
+  completed: {
+    type: Boolean,
+    default: false
   },
-  cast: {
-    type: Array, 
-  },
-  rating: {
+  priority: {
     type: Number,
-    required: true,
-  }, 
-  tags: {
-    type: Array,
-    required: true,
-  }, 
-  image: {
-    type: String,
+    default: 0
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
-})
+});
 
-const Movie = mongoose.model("Movie", MovieSchema);
+const Todo = mongoose.model("Todo", TodoSchema);
 
-// /////////// DOCUMENTARY SCHEMA /////////// //
-const DocumentarySchema = new mongoose.Schema({
-  title: {
-    type: String, 
-    required: true,
-  },
-  swedishTitle: {
-    type: String, 
-  },
-  released: {
-    type: Date,
-  },
-  synopsis: {
+// /////////// USER SCHEMA /////////// //
+
+const UserSchema = new mongoose.Schema({
+  username: {
     type: String,
     required: true,
+    unique: true
   },
-  director: {
+  mail: {
     type: String,
+    required: true,
+    unique: true
   },
-  rating: {
+  password: {
+    type: String,
+    required: true
+  },
+  accessToken: {
+    type: String,
+    default: () => crypto.randomBytes(128).toString("hex")
+  },
+  avatar: {
     type: Number,
-    required: true,
+    default: 1 // You can set a default avatar image if desired */
   }, 
-  tags: {
-    type: Array,
-    required: true,
-  }, 
-  image: {
-    type: String,
-  }
-})
-
-const Documentary = mongoose.model("Documentary", DocumentarySchema);
-
-// /////////// DRAMASERIES SCHEMA /////////// //
-const DramaSeriesSchema= new mongoose.Schema({
-  title: {
-    type: String, 
-    required: true,
-  },
-  swedishTitle: {
-    type: String, 
-  },
-  released: {
-    type: Date,
-  },
-  synopsis: {
-    type: String,
-    required: true,
-  },
-  director: {
-    type: String,
-  },
-  cast: {
-    type: Array, 
-  },
-  seasons: {
-    type: Number, 
-    required: true,
-  },
-  rating: {
+  checkedTasks: {
     type: Number,
-    required: true,
-  }, 
-  tags: {
-    type: Array,
-    required: true,
-  }, 
-  image: {
-    type: String,
+    default: 0
   }
-})
+});
 
-const DramaSeries = mongoose.model("DramaSeries", DramaSeriesSchema);
+const User = mongoose.model("User", UserSchema);
 
-// /////////// DOCUMENTARY SERIES SCHEMA /////////// //
-const DocumentarySeriesSchema= new mongoose.Schema({
-  title: {
-    type: String, 
-    required: true,
-  },
-  swedishTitle: {
-    type: String, 
-  },
-  released: {
-    type: Date,
-  },
-  synopsis: {
-    type: String,
-    required: true,
-  },
-  seasons: {
-    type: Number, 
-    required: true,
-  },
-  rating: {
-    type: Number,
-    required: true,
-  },
-  director: {
-    type: String,
-  },
-  tags: {
-    type: Array,
-    required: true,
-  }, 
-  image: {
-    type: String,
+// /////////////////////////////////////////////////////////////////////// //
+// //////////////////////////// AUTHENTICATE USER //////////////////////// //
+// /////////////////////////////////////////////////////////////////////// //
+
+const authenticateUser = async (req, res, next) => {
+  const accessToken = req.header("Authorization")
+  try{
+    const user = await User.findOne({accessToken: accessToken})
+    if (user) {
+      next()
+    } else {
+      res.status(401).json({
+        success: false, 
+        response: "Please login"
+      })
+    }
+  } catch(error){
+    res.status(500).json({
+      success: false,
+      response: error
+    })
   }
-})
-
-const DocumentarySeries = mongoose.model("DocumentarySeries", DocumentarySeriesSchema);
-
-// /////////// PODCAST SCHEMA /////////// //
-const PodcastSchema= new mongoose.Schema({
-  title: {
-    type: String, 
-    required: true,
-  },
-  hosts: {
-    type: Array,
-    required: true,
-  },
-  firstAired: {
-    type: Date,
-  },
-  synopsis: {
-    type: String,
-    required: true,
-  },
-  producedBy: {
-    type: String,
-  },
-  website: {
-    type: String, 
-    required: true,
-  },
-  rating: {
-    type: Number,
-  }, 
-  tags: {
-    type: Array,
-    required: true,
-  }, 
-  image: {
-    type: String,
-  }
-})
-
-const Podcast = mongoose.model("Podcast", PodcastSchema);
-
-// /////////// BOOK SCHEMA /////////// //
-const BookSchema= new mongoose.Schema({
-  title: {
-    type: String, 
-    required: true,
-  },
-  swedishTitle: {
-    type: String, 
-  },
-  author: {
-    type: String, 
-    required: true,
-  },
-  synopsis: {
-    type: String,
-    required: true,
-  },
-  released: {
-    type: Date,
-  },
-  ISBN: {
-    type: Number, 
-    required: true,
-  },
-  rating: {
-    type: Number,
-    required: true,
-  }, 
-  tags: {
-    type: Array,
-    required: true,
-  }, 
-  image: {
-    type: String,
-  }
-})
-
-const Book = mongoose.model("Book", BookSchema);
-
-Movie.deleteMany().then(() => {
-  new Movie({
-    title: "hej hej", 
-    released: new Date(2000,1,1), 
-    synopsis: "en berättelse om mod", 
-    rating: 5, 
-    tags: ["murder", "comedy", "coldcase"], 
-    image: "movie.png"
-  }).save();
-})
-
-Book.deleteMany().then(() => {
-  new Book({
-    title: "Murder",
-    relesed: new Date(2000,1,3),
-    rating: 5, 
-    author: "Bla bla",
-    synopsis: "Det var en gång...", 
-    tags: ["comedy", "murder", "coldcase"], 
-    ISBN: 12345678910
-  }).save();
-})
-
-Documentary.deleteMany().then(() => {
-  new Documentary({
-    title: "En dokumentär",
-    synopsis: "Fyre festival the greatest party that never happened.",
-    rating: 5, 
-    tags: ["comedy", "white collar crime", "coldcase"],
-  }).save();
-})
-
-DramaSeries.deleteMany().then(() => {
-  new DramaSeries({
-    title: "A tv-series",
-    swedishTitle: "En dramaserie",
-    synopsis: "En dramaserie i världsklass.", 
-    seasons: 2, 
-    rating: 2, 
-    tags: ["swedish", "crime", "comedy"]
-  }).save()
-})
-
-
-DocumentarySeries.deleteMany().then(() => {
-  new DocumentarySeries({
-    title: "True Crime Criminals",
-    released: new Date(2011, 9, 1),
-    synopsis: "En dokumentärserie i världsklass.", 
-    seasons: 3, 
-    rating: 3, 
-    tags: ["cold case", "murder"], 
-  }).save()
-})
-
-Podcast.deleteMany().then(() => {
-  new Podcast({
-    title: "My favorite Murder", 
-    hosts: ["Karen Kilgariff", "Georgia Hardstark"],
-    synopsis: "My favorite murder is the best podcast.", 
-    website: "www.karen.com",
-    producedBy: "Exactly Right",
-    tags: ["comedy", "life", "discussion"]
-  }).save()
-})
+};
 
 // //////////////////////////////////////////////////////////////////////// //
 // /////////////////////////////// ROUTES ///////////////////////////////// //
@@ -342,27 +143,171 @@ app.get("/", (req, res) => {
     "Hello frontend developer": "Here's a documentation of the endpoints",
     "Endpoints": [
     {"/": "Api Info"},
-    {"/movies": "GET. See movies"},
-    {"/documentaries": "GET. See documentaries"},
-    {"/drama-series": "GET. See dramaseries"},
-    {"/documentary-series": "GET. See documentary series"},
-    {"/podcasts": "GET. See podcasts."},
-    {"/books": "GET. See books."}
+    {"/register": "POST. Post Mail, Username, Password"},
+    {"/login": "POST. Post Mail, Password"},
+    {"/todos": "GET. See to-dos in descending order"},
+    {"/todos": "POST. Post one new to-do"},
+    {"/todos/:id": "GET. GET one to-do"},
+    {"/todos/:id": "PATCH. Edit one to-do"},
+    {"/todos/:id": "DELETE. Delete one to-do"},
+    {"/todos/:id/completed": "PATCH. Update completed status of one todo"}
     ]
   });
 });
 
-// ================= GET MOVIES =============== //
+// ================= REGISTER =============== //
 
-app.get("/movies", async (req, res) => {
+app.post("/register", async (req, res) => {
+  const {username, mail, password } = req.body
   try {
-    Movie.find().then((movie) => {
-      res.status(200).json({
-        success: true, 
-        response: movie,
-        message: "Successfully found Movies list"
-      });
+    const salt = bcrypt.genSaltSync() //create random salt
+    const newUser = await new User({
+      username: username,
+      mail: mail, // will not be used in frontend store
+      password: bcrypt.hashSync(password, salt) // hashes the password and the random salt
+    }).save()
+  res.status(201).json({
+    success: true, 
+    response: {
+      username: newUser.username,
+      id: newUser._id,
+      mail: newUser.mail,
+      accessToken: newUser.accessToken, 
+      avatar: newUser.avatar
+    }
+  })
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400).json({
+        success: false,
+        response: "Username already exists! Try another one!"
+      })
+    } else {
+    res.status(400).json({
+      success: false,
+      response: error
     })
+    }
+  }
+})
+
+// ================= LOGIN =============== //
+
+app.post("/login", async (req, res) => {
+  const { mail, password } = req.body; // Extract the mail and password from the request body
+
+  try {
+    const user = await User.findOne({ mail: mail }); // Find a user with the provided mail in the database
+
+    if (user && bcrypt.compareSync(password, user.password)) {
+      // Check if the user exists and the provided password matches the hashed password in the database
+      res.status(200).json({
+        success: true,
+        response: {
+          username: user.username,
+          id: user._id,
+          mail: user.mail, //will not be used in the frontend
+          accessToken: user.accessToken,
+          checkedTasks: user.checkedTasks,
+          avatar: user.avatar
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        response: "Credentials do not match or the account does not exist"
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      response: error
+    });
+  }
+});
+
+
+
+// ================= COMPLETED TASKS USER =============== //
+app.patch("/users/:id/checkedtasks", authenticateUser)
+app.patch("/users/:id/checkedtasks", async (req, res) => {
+  const { id } = req.params;
+  const increment = parseInt(req.body.increment);
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { $inc: { checkedTasks: increment } },
+      { new: true }
+    );
+
+    if (updatedUser) {
+      res.status(200).json({
+        success: true,
+        response: updatedUser,
+        message: "Changed amount of checked tasks",
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        response: "Failed to change checked tasks total.",
+      });
+    }
+  } catch (error) {
+    console.log(error); // Log the error to the console
+    res.status(400).json({
+      success: false,
+      response: error,
+      message: "Failed to update checked tasks, bad request",
+    });
+  }
+});
+
+// ================= PATCH AVATAR =============== //
+
+app.patch("/users/:id/avatar", authenticateUser);
+app.patch("/users/:id/avatar", async (req, res) => {
+  const { id } = req.params; // Extract the todo id from the request parameters
+  const { avatar } = req.body; // Extract the updated fields from the request body
+  try {
+    const updatedUser = await User.findByIdAndUpdate(id, { avatar }, { new: true }
+    );
+
+    if (updatedUser) {
+      res.status(200).json({
+        success: true,
+        response: updatedUser,
+        message: "Avatar updated successfully"
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        response: "User not found"
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      response: error,
+      message: "Failed to update the avatar"
+    });
+  }
+});
+
+
+// ================= GET TO-DOs =============== //
+
+app.get("/todos", authenticateUser)
+app.get("/todos", async (req, res) => {
+    const accessToken = req.header("Authorization"); // Extract the access token from the request header
+    const user = await User.findOne({ accessToken: accessToken }); // Find the user associated with the access token
+  try {
+    const displayedTodos = await Todo.find({ user: user._id }).sort({createdAt: 'desc'}) // Exec()?
+    res.status(200).json({
+      success: true, 
+      response: displayedTodos,
+      message: "Successfully found To-do list"
+    });
 } catch(error) {
   res.status(400).json({
     success: false,
@@ -372,48 +317,7 @@ app.get("/movies", async (req, res) => {
 }
 });
 
-// ================= GET DOCUMETARIES =============== //
-
-app.get("/documentaries", async (req, res) => {
-  try {
-    Documentary.find().then((documentary) => {
-      res.status(200).json({
-        success: true, 
-        response: documentary,
-        message: "Successfully found documentary list"
-      });
-    })
-} catch(error) {
-  res.status(400).json({
-    success: false,
-    response: error,
-    message: "Did not find documentary list"
-   });
-}
-});
-
-// ================= GET DOCUMETARIES =============== //
-
-app.get("/drama-series", async (req, res) => {
-  try {
-    DramaSeries.find().then((dramaseries) => {
-      res.status(200).json({
-        success: true, 
-        response: dramaseries,
-        message: "Successfully found dramaseries list"
-      });
-    })
-} catch(error) {
-  res.status(400).json({
-    success: false,
-    response: error,
-    message: "Did not find dramaseries list"
-   });
-}
-});
-
-
-/* // ================= POST TO-DOs =============== //
+// ================= POST TO-DOs =============== //
 
 app.post("/todos", authenticateUser);
 app.post("/todos", async (req, res) => {
@@ -440,35 +344,36 @@ app.post("/todos", async (req, res) => {
       message: "Failed to create a new todo"
     });
   }
-}); */
+});
 
-// ================= GET MOVIE =============== //
+// ================= GET TO-DO =============== //
+app.get("/todos/:id", authenticateUser);
 app.get("/todos/:id", async (req, res) => {
   const { id } = req.params; // Extract the todo id from the request parameters
   try {
-    const singleMovie = await Movie.findById(id, );
+    const singleTodo = await Todo.findById(id, );
 
-    if (singleMovie) {
+    if (singleTodo) {
       res.status(200).json({
         success: true,
-        response: singleMovie,
-        message: "Single movie found!"
+        response: singleTodo,
+        message: "Single todo found!"
       });
     } else {
       res.status(404).json({
         success: false,
-        response: "Single movie not found"
+        response: "Single todo not found"
       });
     }
   } catch (error) {
     res.status(400).json({
       success: false,
       response: error,
-      message: "Failed to find the single movie"
+      message: "Failed to find the single todo"
     });
   }
 });
-/* 
+
 // ================= PATCH TO-DO =============== //
 
 app.patch("/todos/:id", authenticateUser);
@@ -563,7 +468,7 @@ app.delete("/todos/:id", async (req, res) => {
 // /////////////////////////////////////////////////////////////////////// //
 // //////////////////////////// START SERVER ///////////////////////////// //
 // /////////////////////////////////////////////////////////////////////// //
- */
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
